@@ -20,4 +20,4 @@ jobs:
           username: "LamaAdmin"
           password: "LamaLozinka4"
           script: |
-            echo "This is a dummy file" > C:\path\to\dummy.txt
+            echo "This is a dummy file" > C:\LamaSoftware\vlah-test\dummy.txt
