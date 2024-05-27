@@ -7,7 +7,7 @@ on:
 
 jobs:
   create-file:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
 
     steps:
       - name: Checkout repository
@@ -16,8 +16,8 @@ jobs:
       - name: Create dummy.txt on remote Windows PC
         uses: appleboy/ssh-action@v0.1.4
         with:
-          host: "cloudvm2021.westeurope.cloudapp.azure.com"
-          username: "LamaAdmin"
-          password: "LamaLozinka4"
+          host: ${{ secrets.REMOTE_HOST }}
+          username: ${{ secrets.REMOTE_PASSWORD }}
+          password: ${{ secrets.REMOTE_USER }}
           script: |
-            echo "This is a dummy file" > C:\LamaSoftware\vlah-test\dummy.txt
+            echo "This is a dummy file" > C:\path\to\dummy.txt
