@@ -1,23 +1,26 @@
-name: Create Dummy File on Remote PC
+name: Remote Windows PC Automation
 
 on:
   push:
     branches:
-      - develop
+      - main
 
 jobs:
-  create-file:
-    runs-on: ubuntu-latest
+  create-dummy-file:
+    runs-on: windows-latest
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
 
       - name: Create dummy.txt on remote Windows PC
-        uses: appleboy/ssh-action@v0.1.4
-        with:
-          host: ${{ secrets.REMOTE_HOST }}
-          username: ${{ secrets.REMOTE_PASSWORD }}
-          password: ${{ secrets.REMOTE_USER }}
-          script: |
-            echo "This is a dummy file" > C:\LamaSoftware\vlah-test\dummy.txt
+        run: |
+          $remoteComputer = "${{ secrets.REMOTE_HOST }}"
+          $remoteUser = "${{ secrets.REMOTE_USER }}"
+          $remotePassword = "${{ secrets.REMOTE_PASSWORD }}"
+          $securePassword = ConvertTo-SecureString $remotePassword -AsPlainText -Force
+          $credential = New-Object System.Management.Automation.PSCredential ($remoteUser, $securePassword)
+          Invoke-Command -ComputerName $remoteComputer -Credential $credential -ScriptBlock {
+              New-Item -Path "C:\LamaSoftware\vlah-test\dummy.txt" -ItemType File -Force
+          }
+        shell: pwsh
