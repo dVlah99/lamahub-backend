@@ -7,7 +7,7 @@ on:
 
 jobs:
   create-file:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
@@ -20,4 +20,4 @@ jobs:
           username: ${{ secrets.REMOTE_PASSWORD }}
           password: ${{ secrets.REMOTE_USER }}
           script: |
-            echo "This is a dummy file" > C:\path\to\dummy.txt
+            echo "This is a dummy file" > C:\LamaSoftware\vlah-test\dummy.txt
