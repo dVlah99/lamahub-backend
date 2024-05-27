@@ -3,7 +3,7 @@ name: Remote Windows PC Automation
 on:
   push:
     branches:
-      - develop
+      - main
 
 jobs:
   create-dummy-file:
@@ -13,6 +13,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
+      - name: Configure TrustedHosts
+        run: |
+          Set-Item WSMan:\localhost\Client\TrustedHosts -Value "${{ secrets.REMOTE_HOST }}"
+        shell: pwsh
+
       - name: Create dummy.txt on remote Windows PC
         run: |
           $remoteComputer = "${{ secrets.REMOTE_HOST }}"
@@ -20,7 +25,10 @@ jobs:
           $remotePassword = "${{ secrets.REMOTE_PASSWORD }}"
           $securePassword = ConvertTo-SecureString $remotePassword -AsPlainText -Force
           $credential = New-Object System.Management.Automation.PSCredential ($remoteUser, $securePassword)
-          Invoke-Command -ComputerName $remoteComputer -Credential $credential -ScriptBlock {
-              New-Item -Path "C:\LamaSoftware\vlah-test\dummy.txt" -ItemType File -Force
+          $sessionOption = New-PSSessionOption -SkipCACheck -SkipCNCheck -SkipRevocationCheck
+          $session = New-PSSession -ComputerName $remoteComputer -Credential $credential -UseSSL -SessionOption $sessionOption
+          Invoke-Command -Session $session -ScriptBlock {
+              New-Item -Path "C:\path\to\directory\dummy.txt" -ItemType File -Force
           }
+          Remove-PSSession -Session $session
         shell: pwsh
