@@ -10,29 +10,28 @@ jobs:
     runs-on: windows-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-    - name: Set up environment
-      run: |
-        # Install Chocolatey (if not already installed) and configure any required software, e.g., RDPWrapper
-        Set-ExecutionPolicy Bypass -Scope Process -Force; `
-        [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; `
-        iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
-        choco install -y rdpwrapper
-      shell: powershell
+      - name: Set up environment
+        run: |
+          # Install Chocolatey (if not already installed) and configure any required software, e.g., RDPWrapper
+          Set-ExecutionPolicy Bypass -Scope Process -Force; `
+          [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; `
+          iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
+          choco install -y rdpwrapper
+        shell: powershell
 
-    - name: Create a file on the remote PC
-      run: |
-        $password = ConvertTo-SecureString $env:REMOTE_PASSWORD -AsPlainText -Force
-        $credential = New-Object System.Management.Automation.PSCredential ($env:REMOTE_USER, $password)
-        $session = New-PSSession -ComputerName $env:REMOTE_HOST -Credential $credential
-        Invoke-Command -Session $session -ScriptBlock {
-            New-Item -Path "C:\LamaSoftware\vlah-test\deployTest.txt" -ItemType File
-        }
-        Remove-PSSession $session
-      env:
-        REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
-        REMOTE_USER: ${{ secrets.REMOTE_USER }}
-        REMOTE_PASSWORD: ${{ secrets.REMOTE_PASSWORD }}
-      shell: powershell
+      - name: Parse CLOUD secret and create a file on the remote PC
+        run: |
+          $cloud = $env:CLOUD | ConvertFrom-Json
+          $password = ConvertTo-SecureString $cloud.REMOTE_PASSWORD -AsPlainText -Force
+          $credential = New-Object System.Management.Automation.PSCredential ($cloud.REMOTE_USER, $password)
+          $session = New-PSSession -ComputerName $cloud.REMOTE_HOST -Credential $credential
+          Invoke-Command -Session $session -ScriptBlock {
+              New-Item -Path "C:\LamaSoftware\vlah-test\deployTest.txt" -ItemType File
+          }
+          Remove-PSSession $session
+        env:
+          CLOUD: ${{ secrets.CLOUD }}
+        shell: powershell
