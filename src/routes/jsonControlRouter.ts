@@ -14,6 +14,7 @@ router.post(
   "/:key",
   async (req: Request, res: Response, next: NextFunction) => {
     try {
+      console.log("dummy console log za test");
       const { key } = req.params;
       const bodies: LamaProduct[] = req.body;
 
